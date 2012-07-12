@@ -1,0 +1,192 @@
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>A plant in your browser</title>
+		<script type="text/javascript" charset="utf-8" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/lsystem-client/main.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/gfx.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/tree.js"></script>
+		<script src="http://github.com/janl/mustache.js/raw/master/mustache.js"></script>
+
+		<script type="text/javascript" charset="utf-8">
+			
+			var g_current_user = new Object();
+			var g_current_plant = null;
+
+			var g_last_timeline_id = '';
+			
+			function do_login () {
+				
+				var username = $('#username').val();
+				var password = $('#password').val();
+
+				login(username, password, login_callback);
+			}
+			
+			function login_callback (result) {
+				
+				if(result)
+				{
+					get_environments(update_environments_info);
+					
+					get_usernames(render_usernames);
+				}
+				else
+				{
+					console.log("wrong login");
+				}
+				
+			}
+			
+			function render_usernames (usernames) {
+				
+				var template = $('#usernames-template').html();
+				$('#usernames-content').html(Mustache.to_html(template, {'usernames':usernames}));
+			}
+			
+			function update_environments_info (environments) {
+				
+				console.log(environments);
+				
+				var env_areas = '';
+				var template = $('#environments-template').html();
+				
+				for (var i = environments.length - 1; i >= 0; i--){
+					
+					env_areas += Mustache.to_html(template, environments[i]);
+				}
+				
+				$('#environments-content').html(env_areas);
+				
+				load_plant('default', show_plant_info);
+			}
+			
+			function show_plant_info (plant) {
+				
+				var template = $('#plant_info-template').html();
+				console.log(plant);
+				$('#plant_info-content').html(Mustache.to_html(template, plant));
+				
+				g_current_plant = plant.plant;
+				render_scene(plant.plant);
+			}
+			
+			function get_timeline () {
+				
+				timeline_last_messages(g_last_timeline_id,update_timeline);
+			}
+			
+			function update_timeline (timeline) {
+				
+				var template = $("#timeline-template").html();
+				
+				var messages='';
+				
+				if(timeline.length<=0) return;
+				
+				for (var i = timeline.length - 1; i >= 0; i--){
+				
+					messages += Mustache.to_html(template, timeline[i]);
+				}
+				
+				g_last_timeline_id = timeline[timeline.length-1].id
+				
+				var old = $("#timeline-content").html();
+				$("#timeline-content").html(messages + old);
+			}
+		</script>
+	</head>
+	<body id="index" onload="">
+
+		<div id="buttons">
+			<ul style="display: inline; list-style-type: none;">
+				<li><input type="text" id="username" value="fra"/>&nbsp;<input type="text" id="password" value="fra"/><span onclick="do_login();">loggati</span></li>
+				<li onclick="get_environments(g_session_id, update_environments_info);">ambienti di crescita</li>
+			</ul>
+		</div>
+		<div id="environments_area">
+			
+			<div id="environments-template" style="display:none;">
+				<div id="environment_{{name}}">
+					Nome ambiente: {{name}}<br/>
+					Orario di accensione luci: {{light_on}} - {{light_off}}<br/>
+					Piante:<br/>
+					<ul>
+					{{#plants}}
+						<li onclick="load_plant(g_session_id, '{{name}}', show_plant_info)">{{name}}</li>
+					{{/plants}}
+					</ul>
+				</div>
+			</div>
+			
+			<div id="environments-content" style="float:left">
+			</div>
+
+			<canvas width="400" height="400" id="plant_canvas"></canvas>
+			<div id="plant_info" style="float:left">
+				<div id="plant_info-template" style="display:none;">
+					Plant name:<span id="plant_name">{{name}}</span><br/>
+					Available water:<span id="available_water">{{available_water}}</span> <span onclick="add_water(g_session_id, '{{name}}');"><< + >></span><br/>
+					Pot water capacity:<span id="pot_water_capacity">{{pot_water_capacity}}</span><br/>
+					<ul style="display: inline; list-style-type: none;">
+						<li onclick="grow(g_session_id, '{{name}}');">crescine</li>
+						<li onclick="eat(g_session_id, '{{name}}');">mangiane</li>
+					</ul>
+				</div>
+				<div id="plant_info-content">
+				</div>
+			</div>
+			
+			<div style="clear:all"></div>
+		</div>
+		
+		<div id="usernames">
+			<div id="usernames-template" style="display:none;">
+				<h3>all registered users</h3>
+				<ul>
+					{{#usernames}}
+					<li>{{.}}</li>
+					{{/usernames}}
+				</ul>
+			</div>
+			<div id="usernames-content">
+				
+			</div>
+		</div>
+		<div id="timeline">
+			<div id="timeline-template" style="display:none;">
+				<div id="timeline-message-{{id}}">
+					<span>{{username}}</span> at <span>{{datetime}}</span>
+					<div>
+						{{text}}
+					</div>
+					<ul>
+					{{#likes}}
+					<li>{{.}}</li>
+					{{/likes}}
+					</ul>
+				</div>
+			</div>
+			<h3>Timeline</h3>
+			<ul id="timeline-content">
+				
+			</ul>
+			<br/>
+			<span onclick="get_timeline()">Aggiorna</span>
+		</div>
+		<script type="text/javascript">
+			
+			function render_scene(tree)
+			{	
+				reset_canvas();
+				draw_image(3, 200-150, 0);
+				draw_image(2, 200-64, 235);
+				draw_tree(tree, 200,260, Math.PI / 2.0, 2.0);
+			}
+			
+			var context = gfx_init("plant_canvas");
+
+			//setInterval("get_timeline()", 1000);
+		</script>
+	</body>
+</html>

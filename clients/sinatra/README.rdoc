@@ -1,0 +1,19 @@
+= Sinatra Application Template
+tommy chheng
+- forked from zapnap/sinatra-template, removed datamapper + rspec.
+
+----
+A base Sinatra application template. Just fork and build. Yay!
+Includes Haml all ready to go.
+
+== Configuration
+Add gems to Gemfile
+
+Add your controller actions in <tt>application.rb</tt>. Views for these actions are placed in the <tt>views</tt> directory. Static files, including a stock stylesheet, go in the <tt>public</tt> directory. Models go in the <tt>lib</tt> directory and are auto-loaded. 
+
+== Testing
+TODO
+
+== Getting Started
+run using 
+shotgun config.ru -p 4567

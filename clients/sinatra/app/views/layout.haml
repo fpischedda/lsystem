@@ -1,0 +1,21 @@
+!!!
+%html
+  %head
+    %title= SiteConfig.title
+    %link{:href => '/stylesheets/reset.css', :rel => 'stylesheet', :type => 'text/css'}
+    %link{:href => '/stylesheets/text.css', :rel => 'stylesheet', :type => 'text/css'}
+    %link{:href => '/stylesheets/960.css', :rel => 'stylesheet', :type => 'text/css'}
+    %link{:href => '/stylesheets/main.css', :rel => 'stylesheet', :type => 'text/css'}
+    %script{:type => "text/javascript", :src => "http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"}
+    %script{:type => "text/javascript", :src => "/javascripts/application.js"}
+  %body
+    .container_12
+      .grid_12
+        #header
+          #logo
+            %h1
+              %a{:href => '/'}= SiteConfig.title
+      .grid_12= yield
+      .clear
+      .grid_12
+        %p#legal= "&mdash; &copy; #{Time.now.strftime('%Y')} #{SiteConfig.author} &mdash;"

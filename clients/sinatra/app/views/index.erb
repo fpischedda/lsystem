@@ -1,0 +1,264 @@
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>A plant in your browser</title>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="/js/jstween-1.1.min.js"></script>
+		<script type="text/javascript" src="/js/jquery.balloon.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/lsystem-client/main.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/gfx.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/tree.js"></script>
+		<script src="http://github.com/janl/mustache.js/raw/master/mustache.js"></script>
+		<link rel="stylesheet" href="/stylesheets/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
+		<style type="text/css" media="screen">
+			.bottom-balloon {}
+			.top-balloon {}
+		</style>
+		<script type="text/javascript" charset="utf-8">
+			
+			var g_current_user = new Object();
+			var g_current_plant = null;
+
+			var g_last_timeline_id = '';
+			
+			function startup () {
+				
+				get_usernames(render_usernames);
+				
+				get_environments(update_environments_info);
+			}
+			
+			function render_usernames (usernames) {
+				
+				var template = $('#usernames-template').html();
+				$('#usernames-content').html(Mustache.to_html(template, {'usernames':usernames}));
+			}
+			
+			function update_environments_info (environments) {
+				
+				var env_areas = '';
+				var template = $('#environments-template').html();
+				
+				$.each( environments, function(i, e){
+					
+					env_areas += Mustache.to_html(template, e);
+				}
+				
+				$('#environments-content').html(env_areas);
+				
+				user_items(show_user_items);
+				
+				show_plant_info(environments[0].plants[0]);
+				
+			}
+			
+			function show_plant_info (plant) {
+				
+				var template = $('#plant_info-template').html();
+				console.log(plant);
+				plant.water_perc = plant.available_water/plant.pot_water_capacity*100;
+				$('#plant_info-content').html(Mustache.to_html(template, plant));
+				
+				g_current_plant = plant.plant;
+				render_scene(plant.plant);
+			}
+			
+			function get_timeline () {
+				
+				timeline_last_messages(g_last_timeline_id,update_timeline);
+			}
+			
+			function do_use_magic_bottle (name) {
+				
+				use_magic_bottle(name, show_plant_info);
+			}
+			
+			function update_timeline (timeline) {
+				
+				var template = $("#timeline-template").html();
+				
+				var messages='';
+				
+				if(timeline.length<=0) return;
+				
+				$.each( timeline, function(i, msg){
+					messages += Mustache.to_html(msg);
+				});
+				
+				g_last_timeline_id = timeline[timeline.length-1].id;
+				
+				var old = $("#timeline-content").html();
+				$("#timeline-content").html(messages + old);
+			}
+			
+			function show_user_items (response) {
+				var template = $('#items-template').html();
+				
+				var usable = Array();
+				
+				$.each( response.items, function(i, item){
+					
+					item.description = get_item_description(item.name);
+					
+					if(item.usable)
+					{
+						usable.push(item);
+					}
+				});
+				
+				$('#items-content').html(Mustache.to_html(template, {'items':usable}));
+				
+				$(function() {
+					$('.bottom-balloon').balloon({position:"bottom"});
+					$('.top-balloon').balloon({position:"top"});
+					$('.left-balloon').balloon({position:"left"});
+					$('.right-balloon').balloon({position:"right"});
+				});
+				
+			}
+			
+			function on_item_use (item, plant, success) {
+				
+				if(success)
+				{
+					if(item.usable)
+					{
+						$("#item-quantity-"+item.name).text(item.quantity);
+					}
+
+					show_plant_info(plant);
+				}
+				else
+				{
+					alert('unable to use the selected item: ' + item);
+				}
+			}
+			
+			function update_water (available_water,water_reserve) {
+				
+				$('#available_water').text(available_water);
+				$('#item-quantity-water-reserve').text(water_reserve);
+			}
+		</script>
+	</head>
+	<body id="index" onload="">
+
+		<div id="user_area">
+			Bentornato <%= session[:username]%> <span><a href="/logout">Exit</a></span>
+		</div>
+		<div id="environments_area">
+			
+			<div id="environments-template" style="display:none;">
+				<div id="environment_{{name}}">
+					Nome ambiente: {{name}}<br/>
+					Orario di accensione luci: {{light_on}} - {{light_off}}<br/>
+					Piante:<br/>
+					<ul>
+					{{#plants}}
+						<li onclick="load_plant('{{name}}', show_plant_info)" class="bottom-balloon" title="the name of this plant is {{name}}">{{name}}</li>
+					{{/plants}}
+					</ul>
+				</div>
+			</div>
+			
+			<div id="environments-content" style="float:left;padding: 20px">
+			</div>
+
+			<div id="plant_area" style="float:right" class="left-balloon" title="here you can see and take care of your plants">
+				<canvas width="400" height="400" id="plant_canvas"></canvas>
+			</div>
+			<div id="plant_info" style="float:right" class="bottom-balloon" title="here you can see some info about your plant">
+				<div id="plant_info-template" style="display:none;">
+					Plant name:<span id="plant_name">{{name}}</span><br/>
+					Available water:<span id="available_water">{{available_water}}</span> 
+						<span onclick="add_water('{{name}}', update_water);"><< +5 L >></span><br/>
+					Pot water capacity:<span id="pot_water_capacity">{{pot_water_capacity}}</span><br/>
+					<ul style="display: inline; list-style-type: none;">
+						<li onclick="grow('{{name}}');">crescine</li>
+						<li onclick="eat('{{name}}');">mangiane</li>
+					</ul>
+				</div>
+				<div id="plant_info-content" style="padding: 20px">
+				</div>
+			</div>
+			<div style="float: right;">
+				<div id="avatar" class='right-balloon' title="Hello <%= session[:username]%>, how are you?" style="background-image: url(/images/avatars/miao.png); width: 158px; height: 216px; position: relative;"></div>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+		<div id="items">
+			<div id="items-template" style="display:none;">
+				<h3>Available items</h3>
+				<ul>
+				{{#items}}
+					<li>
+						<div class='top-balloon box radius' title="{{description}}">
+							<h3>{{name}}</h3><br/>
+							<span><img src="/images/items/{{name}}.png" class="top-balloon" style="width:64px;" alt="{{description}}"/></span>
+							# <span id="item-quantity-{{name}}">{{quantity}}</span> <br/>
+							<span onclick="use_item('{{name}}','default', on_item_use)"><h4 class="simple_hover">USE</h4></span>
+						</div>
+					</li>
+				{{/items}}
+				</ul>
+			</div>
+			<div id="items-content" class="horiznav">
+				
+			</div>
+		</div>
+		<div style="clear: both;">
+		<div id="usernames">
+			<div id="usernames-template" style="display:none;">
+				<h3>all registered users</h3>
+				<ul>
+					{{#usernames}}
+					<li>{{.}}</li>
+					{{/usernames}}
+				</ul>
+			</div>
+			<div id="usernames-content">
+				
+			</div>
+		</div>
+		
+		<div id="timeline">
+			<div id="timeline-template" style="display:none;">
+				<div id="timeline-message-{{id}}">
+					<span>{{username}}</span> at <span>{{datetime}}</span>
+					<div>
+						{{text}}
+					</div>
+					<ul>
+					{{#likes}}
+					<li>{{.}}</li>
+					{{/likes}}
+					</ul>
+				</div>
+			</div>
+			<h3>Timeline</h3>
+			<ul id="timeline-content">
+				
+			</ul>
+			<br/>
+			<span onclick="get_timeline()">Aggiorna</span>
+		</div>
+		<div id="disclaimer">
+			2012 - All rights reserverd by Camilla Cali and Francesco Pischedda
+		</div>
+		<script type="text/javascript">
+			
+			function render_scene(tree)
+			{	
+				reset_canvas();
+				draw_image(3, 200-150, 0);
+				draw_image(2, 200-64, 235);
+				draw_tree(tree, 200,260, Math.PI / 2.0, 1.0);
+			}
+			
+			var context = gfx_init("plant_canvas");
+
+			startup();
+			//setInterval("get_timeline()", 1000);
+		</script>
+	</body>
+</html>

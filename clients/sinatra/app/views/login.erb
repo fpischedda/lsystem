@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>A plant in your browser</title>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="/js/jstween-1.1.min.js"></script>
+		<script type="text/javascript" src="/js/jquery.balloon.min.js"></script>
+	</head>
+	<body id="login" onload="">
+		
+		<% if @reason %>
+		<div id="error" style="color: red;">
+			<%= @reason %>
+		</div>
+		<% end%>
+		Login <br>
+		<div style="float: left;">
+		<div id="login-area" title="Use your username and password to access the game, if you don't have these data please register to the game">
+			<form action="/login" method="post" accept-charset="utf-8">
+
+				<input type="text" name="email" value="fra@fra" id="email">
+				<input type="password" name="password" value="" id="password">
+
+				<p><input type="submit" value="Login &rarr;"></p>
+			</form>
+		</div>
+		<br><br>
+		<div id="registration-area" title="Register your email to play the game">
+			Register <br>
+			<form action="/register" method="post" accept-charset="utf-8">
+
+				Email :<input type="text" name="email" value="" id="email"><br>
+				Username :<input type="text" name="username" value="" id="username"><br>
+				Password :<input type="password" name="password" value="" id="password"><br>
+
+				<p><input type="submit" value="Register &rarr;"></p>
+			</form>
+		</div>
+		</div>
+		<div style="float: left;">
+		<div id="avatar" style="background-image: url(/images/avatars/miao.png); width: 158px; height: 216px; position: fixed;"></div>
+		</div>
+		<div style="clear: both;">
+		
+		<div id="disclaimer">
+			2012 - All rights reserverd by Camilla Cali and Francesco Pischedda
+		</div>
+	
+		<script type="text/javascript" charset="utf-8">
+			$('#avatar').tween({
+			   top:{
+			      stop: 300,
+			      time: 0,
+			      duration: 1.5,
+			      units: 'px',
+			      effect: 'easeInOut',
+				  onStop: function( element, state ){
+				  	
+					$('#avatar').tween({
+					   top:{
+					      stop: 0,
+					      time: 0,
+					      duration: 1.5,
+					      units: 'px',
+					      effect: 'easeInOut'
+					   }
+					});
+				  }
+			   }
+			});
+
+			$.play();
+			
+			$(function() {
+				$('#login-area').balloon({position:"bottom right"});
+				$('#registration-area').balloon({position:"bottom"});
+				$('#avatar').balloon({contents:"hello I'm your avatar, please login or register and follow me", position:"right"});
+			});
+		</script>
+	</body>
+</html>
