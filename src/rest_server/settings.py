@@ -1,26 +1,35 @@
+###
+# Francesco Pischedda
+# read settings from the specified JSON file
+# a default configuration is set
+###
 import json
 import logging
 import sys
-
-#! /usr/bin/python
-
-# legge i settaggi dell'applicazione da un file di configurazione
 
 
 class Settings:
 
     __instance = None
 
-    def __init__(self, filename='settings/app.json'):
+    __default_settings = { 
+                    "actions": {}, 
+                    "action_stub": {}, 
+                    "log_filename": './log.txt'}
+
+    def __init__(self):
+
+        self.configuration_file = None
+        self.settings = Settings.__default_settings.copy()
+
+    def __init__(self, filename):
 
         #setto la configurazione di base che verra' eventualmente
         #sovrascritta da quella del file di configurazione
         self.configuration_file = filename
 
-        self.actions = {}
-        self.action_stub = {}
-        self.log_filename = './log.txt'
-        
+        self.settings = Settings.__default_settings.copy()
+
         try:
             f = open(filename)
 
@@ -29,17 +38,24 @@ class Settings:
 
             conf_obj = json.loads(conf)
 
-            self.actions = conf_obj['actions']
-            self.action_stub = conf_obj['action_stub']
-            
+            self.update(conf_obj)
+
         except:
             logging.warning("error while reading settings file %s nella lettura del file di configurazione: %s" % (filename, str(sys.exc_info())))
         finally:
             #set the logging level to debug
             logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename=self.log_filename,
+                    filename=self.settings["log_filename"],
                     filemode='a')
+
+    def __getattr__(self, name):
+
+        try:
+            return self.settings[name]
+        except:
+            raise AttributeError("setting %s not found" % name)
+
     @staticmethod
     def load_configuration(filename='settings/app.json'):
 
@@ -56,12 +72,12 @@ class Settings:
 
         return Settings.__instance
 
+    @staticmethod
+    def default_settings():
+        return Settings.__default_settings
     def __repr__(self):
 
-        dict = {'log_filename':self.log_filename, 'actions':self.actions,
-            'action_stub':self.action_stub}
-            
-        return json.dumps(dict, sort_keys=True, indent=4)
+        return json.dumps(elf.settings, sort_keys=True, indent=4)
 
 __author__="francescopischedda"
 __date__ ="$23-feb-2011 10.02.55$"
