@@ -5,7 +5,7 @@ class TestDefaultSettings(unittest.TestCase):
 
     def test_default_settings(self):
 
-        s = Settings.load_configuration('./test_settings.json')
+        s = Settings()
 
         defaults = Settings.default_settings()
 

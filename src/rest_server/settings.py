@@ -17,18 +17,14 @@ class Settings:
                     "action_stub": {}, 
                     "log_filename": './log.txt'}
 
-    def __init__(self):
+    def __init__(self, filename=None):
 
-        self.configuration_file = None
-        self.settings = Settings.__default_settings.copy()
-
-    def __init__(self, filename):
-
-        #setto la configurazione di base che verra' eventualmente
-        #sovrascritta da quella del file di configurazione
         self.configuration_file = filename
 
         self.settings = Settings.__default_settings.copy()
+
+        if filename == None:
+            return
 
         try:
             f = open(filename)
@@ -37,11 +33,12 @@ class Settings:
             f.close()
 
             conf_obj = json.loads(conf)
+            #merge the base settings with those provided by
+            #the configuration file
+            self.settings.update(conf_obj)
 
-            self.update(conf_obj)
-
-        except:
-            logging.warning("error while reading settings file %s nella lettura del file di configurazione: %s" % (filename, str(sys.exc_info())))
+        except Exception as e:
+            raise e
         finally:
             #set the logging level to debug
             logging.basicConfig(level=logging.DEBUG,
