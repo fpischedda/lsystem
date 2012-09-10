@@ -13,6 +13,11 @@ class TestDefaultSettings(unittest.TestCase):
         self.assertEqual(defaults["actions"], s.actions)
         self.assertEqual(defaults["log_filename"], s.log_filename)
 
+class TestSettingsLoadingFailure(unittest.TestCase):
+
+    def test_load_configuration_fail(self):
+
+        self.assertRaises(Exception, Settings.load_configuration,'bogusfile')
 if __name__ == "__main__":
     
     unittest.main()
