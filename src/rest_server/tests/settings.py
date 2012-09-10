@@ -18,6 +18,15 @@ class TestSettingsLoadingFailure(unittest.TestCase):
     def test_load_configuration_fail(self):
 
         self.assertRaises(Exception, Settings.load_configuration,'bogusfile')
+
+class TestAccessNonExistentSetting(unittest.TestCase):
+
+    def test_access_nonexistent_setting(self):
+        
+        s = Settings()
+
+        self.assertRaises(AttributeError,s.__getattr__,"impossible_setting")
+
 if __name__ == "__main__":
     
     unittest.main()
