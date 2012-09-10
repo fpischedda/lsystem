@@ -1,0 +1,17 @@
+{
+    "action_stub":{
+            "function":"",
+            "parameters":[],
+            "protected":true
+        },
+    "actions": {
+        "test_func":{
+            "function":"test.func",
+            "parameters":[
+                {"name":"parameter1", "position":0, "optional":false}
+            ],
+            "protected":false
+        }
+    },
+    "log_filename":"some_logfile"
+}
