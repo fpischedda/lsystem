@@ -1,15 +1,14 @@
-#! /usr/bin/python
-
-# this module describe a truck as a parte of a tree
-
-__author__="francescopischedda"
-__date__ ="$26-mag-2011 10.11.16$"
+# this module describe a trunk as a parte of a tree
+__author__ = "francescopischedda"
+__date__ = "$26-mag-2011 10.11.16$"
 
 import random
+from utils.equality_comparable import EqualityComparable
 
-class Trunk(object):
 
-    #this class variable defines the amount of water needed (in liters) 
+class Trunk(EqualityComparable):
+
+    #this class variable defines the amount of water needed (in liters)
     # to keep 1.0 cm of trunk length alive
     TRUNK_LENGTH_TO_WATER_NEEDS = 0.01
 
@@ -26,7 +25,8 @@ class Trunk(object):
     def unserialize(cls, obj):
 
         inst = cls(obj['node_type'], obj['angle'],
-            obj['length'], obj['max_length'], obj['max_grow_unit'], obj['energy'])
+                   obj['length'], obj['max_length'],
+                   obj['max_grow_unit'], obj['energy'])
 
         children = [Trunk.unserialize(c) for c in obj['children']]
 
@@ -57,12 +57,12 @@ class Trunk(object):
         else:
 
             new = [cls.randomize_default('a', max_trunk_length),
-                    cls.randomize_default('b', max_trunk_length)]
+                   cls.randomize_default('b', max_trunk_length)]
 
         return new
 
     def __init__(self, type=0, angle=0, length=0, max_length=0,
-        max_grow_unit=4.0, energy=1.0, children=list()):
+                 max_grow_unit=4.0, energy=1.0, children=list()):
         """Init a trunk"""
 
         self.type = type
@@ -77,8 +77,8 @@ class Trunk(object):
         #the max misure of how much length a trunk can grow on a full night;
         #a standard night lasts 18 hours
         self.max_grow_unit = max_grow_unit
-        self.max_grow_unit_one_second = self.max_grow_unit / (3600.0*12)
-        
+        self.max_grow_unit_one_second = self.max_grow_unit / (3600.0 * 12)
+
         #the trunk's available energy, the range is 0.0 - 1.0
         #when a trunk grows it consumes its energy; lost energy will be acquired
         #from the water feeded to this trunk
@@ -86,7 +86,7 @@ class Trunk(object):
 
     def water_needed_by_trunk(self):
 
-        return (1.0-self.energy) * self.current_length * Trunk.TRUNK_LENGTH_TO_WATER_NEEDS
+        return (1.0 - self.energy) * self.current_length * Trunk.TRUNK_LENGTH_TO_WATER_NEEDS
 
     def water_needed(self):
         """
@@ -116,7 +116,7 @@ class Trunk(object):
             energy += t.energy_needed()
 
         return energy
-    
+
     def eat(self, available_water, seconds):
         """
         a trunk can eat water_needed_by_trunk() units of water per second;
@@ -127,7 +127,7 @@ class Trunk(object):
         if available_water <= 0:
 
             return 0
-        
+
         water_needed = 0
 
         if self.energy < 1.0:
@@ -159,7 +159,7 @@ class Trunk(object):
 
             #remove the used water from the reserve
             available_water -= water_needed
-            
+
         #feed every branch the same quantity of food
         if len(self.children) > 1:
             available_water = available_water / len(self.children)
@@ -192,7 +192,6 @@ class Trunk(object):
         a trunk can grow a max of Trunk.MAX_GROW_UNIT_ONE_SECOND centimeters
         per second
         """
-        print "children %s " % len(self.children)
         for n in self.children:
 
             n.grow(seconds)
@@ -213,57 +212,15 @@ class Trunk(object):
 
                     self.current_length = self.max_length
 
-                    self.children.extend( Trunk.next_children(self.type, self.max_length) )
+                    self.children.extend(Trunk.next_children(self.type, self.max_length))
 
     def serialize(self):
 
         children = [c.serialize() for c in self.children]
 
-        obj = {'node_type':self.type,'angle':self.angle,
-            'length':self.current_length, 'max_length':self.max_length,
-            'max_grow_unit':self.max_grow_unit,
-            'energy':self.energy, 'children' : children}
+        obj = {'node_type': self.type, 'angle': self.angle,
+               'length': self.current_length, 'max_length': self.max_length,
+               'max_grow_unit': self.max_grow_unit,
+               'energy': self.energy, 'children': children}
 
         return obj
-
-if __name__ == "__main__":
-
-    t = Trunk.randomize_default("a", 6.0)
-
-    ts = t.serialize()
-    print ts
-    tus = Trunk.unserialize(ts)
-    print tus.angle
-
-    nn = Trunk.next_children(t.type, t.max_length)
-    print nn
-
-    seconds = 240.0
-    water = 5.0
-    
-    print("start energy %s" % t.energy)
-    print("start water %s" % water)
-
-    print("keep alive consumed %s units of energy in %s seconds" % (t.keep_alive(seconds), seconds))
-    print("energy after keepalive for %s seconds: %s" % (seconds, t.energy))
-
-    water -= t.eat(water, seconds)
-    print("water available after eat for %s seconds %s" % (seconds, water))
-
-    print("energy after eat for %s seconds: %s" % (seconds, t.energy))
-
-    print("keep alive consumed %s units of energy in %s seconds" % (t.keep_alive(seconds), seconds))
-    print("energy after keepalive for %s seconds: %s" % (seconds, t.energy))
-
-    water -= t.eat(water, seconds)
-    print("water available after eat for %s seconds %s" % (seconds, water))
-
-    print("energy after eat for %s seconds: %s" % (seconds, t.energy))
-
-    nn = Trunk.next_children(t.type, t.max_length)
-
-    t.children = nn
-
-    t.grow(seconds)
-
-    print nn
