@@ -1,13 +1,11 @@
-#! /usr/bin/python
-
-# This singleton class handles the plants and expose functions to interact
+# This class handles the plants and expose functions to interact
 # with user actions
+__author__ = "francescopischedda"
+__date__ = "$30-dic-2011 17.15.22$"
 
-__author__="francescopischedda"
-__date__ ="$30-dic-2011 17.15.22$"
-
-from plant import Plant
 import datetime
+from plant import Plant
+
 
 class Environment:
 
@@ -25,7 +23,6 @@ class Environment:
 
         return e
 
-
     def __init__(self, name, light_on=5, light_off=21):
 
         self.name = name
@@ -35,13 +32,13 @@ class Environment:
 
         self.light_hours = self.light_off - self.light_on
         self.dark_hours = 24 - self.light_hours
-        
+
         self.updated_at = datetime.datetime.now()
 
     def add_plant(self, p):
 
         self.plants[p.name] = p
-        
+
     def add_water(self, plant_name, liters):
 
         return self.plants[plant_name].fill_water(float(liters))
@@ -72,8 +69,14 @@ class Environment:
         while time_diff > zero:
             print time_diff
 
-            ligths_on = datetime.datetime(updated_at.year,updated_at.month, updated_at.day, self.light_on)
-            ligths_off = datetime.datetime(updated_at.year,updated_at.month, updated_at.day, self.light_off)
+            ligths_on = datetime.datetime(updated_at.year,
+                                          updated_at.month,
+                                          updated_at.day,
+                                          self.light_on)
+            ligths_off = datetime.datetime(updated_at.year,
+                                           updated_at.month,
+                                           updated_at.day,
+                                           self.light_off)
 
             light_on_diff = updated_at - ligths_on
             light_off_diff = updated_at - ligths_off
@@ -109,11 +112,11 @@ class Environment:
 
         plants = [p.serialize() for p in self.plants.values()]
         return {
-            'name':self.name,
-            'light_on':self.light_on,
-            'light_off':self.light_off,
-            'updated_at':self.updated_at,
-            'plants':plants}
+            'name': self.name,
+            'light_on': self.light_on,
+            'light_off': self.light_off,
+            'updated_at': self.updated_at,
+            'plants': plants}
 
 if __name__ == "__main__":
 

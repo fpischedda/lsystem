@@ -1,15 +1,14 @@
-#! /usr/bin/python
-
 # module that define a User object
 # a user has list of plants, a credit balance
 # and a list of items to use
+__author__ = "francescopischedda"
+__date__ = "$27-mag-2011 17.04.07$"
 
-__author__="francescopischedda"
-__date__ ="$27-mag-2011 17.04.07$"
 
 from plant import Plant
 from environment import Environment
 from item import Item
+
 
 def new_user(username, password, email):
     """
@@ -18,14 +17,15 @@ def new_user(username, password, email):
 
     u = User(username, password, email)
 
-    u.add_environment( Environment('natural') )
+    u.add_environment(Environment('natural'))
 
     u.add_plant_to_environment(Plant.randomize_default(), 'natural')
-    u.add_item(Item('water-tank',10, False))
-    u.add_item(Item('water-reserve',10, True))
-    u.add_item(Item('magic-bottle',100, True))
+    u.add_item(Item('water-tank', 10, False))
+    u.add_item(Item('water-reserve', 10, True))
+    u.add_item(Item('magic-bottle', 100, True))
 
     return u
+
 
 class User(object):
 
@@ -48,7 +48,7 @@ class User(object):
                 inst.plants[p.name] = p
 
         return inst
-    
+
     def __init__(self, username, password, email):
 
         self.username = username
@@ -91,10 +91,10 @@ class User(object):
             p.light_on_cycle(60)
             p.light_off_cycle(60)
             p.fill_water()
-            times-=1
+            times -= 1
 
         return 0
-    
+
     def use_item(self, item_name, quantity):
         """
         try to use an item
@@ -102,9 +102,9 @@ class User(object):
         """
         try:
 
-            if self.items[item_name].usable == False:
+            if self.items[item_name].usable is False:
                 return 0
-            
+
             self.items[item_name].quantity -= quantity
 
             if self.items[item_name].quantity < 0:
@@ -114,7 +114,7 @@ class User(object):
             return 0
 
         return quantity
-    
+
     def remove_item(self, item_name):
         """
         remove an item from the inventory
@@ -137,7 +137,7 @@ class User(object):
     def add_environment(self, environment):
 
         self.environments[environment.name] = environment
-        
+
     def add_plant_to_environment(self, plant, environment_name):
 
         try:
@@ -155,24 +155,12 @@ class User(object):
         envs = [e.serialize() for e in self.environments.values()]
         plants = [p.serialize() for p in self.plants.values()]
         items = [i.serialize() for i in self.items.values()]
-        
-        ret = {'username':self.username,
-            'password':self.password,
-            'email':self.email,
-            'plants':plants,
-            'environments':envs,
-            'items':items}
+
+        ret = {'username': self.username,
+               'password': self.password,
+               'email': self.email,
+               'plants': plants,
+               'environments': envs,
+               'items': items}
 
         return ret
-    
-if __name__ == "__main__":
-
-    u = new_user('fra', 'fra', 'fra')
-
-    ser = u.serialize()
-    print ser
-
-    uns = User.unserialize(ser)
-
-    print uns
-    print uns.items

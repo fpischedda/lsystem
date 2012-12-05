@@ -75,7 +75,7 @@ class Trunk(EqualityComparable):
         self.max_length = max_length
 
         #the max misure of how much length a trunk can grow on a full night;
-        #a standard night lasts 18 hours
+        #a standard night lasts 12 hours
         self.max_grow_unit = max_grow_unit
         self.max_grow_unit_one_second = self.max_grow_unit / (3600.0 * 12)
 
@@ -94,9 +94,7 @@ class Trunk(EqualityComparable):
         """
         water = self.water_needed_by_trunk()
 
-        for t in self.children:
-
-            water += t.water_needed()
+        water += sum(map(lambda e: e.water_needed(), self.children))
 
         return water
 
@@ -111,9 +109,7 @@ class Trunk(EqualityComparable):
 
             energy += Trunk.ENERGY_NEEDED_TO_GROW_ONE_SECOND * seconds
 
-        for t in self.children:
-
-            energy += t.energy_needed()
+        energy += sum(map(lambda e: e.energy_needed(), self.children))
 
         return energy
 
@@ -164,9 +160,8 @@ class Trunk(EqualityComparable):
         if len(self.children) > 1:
             available_water = available_water / len(self.children)
 
-        for t in self.children:
-
-            water_needed += t.eat(available_water, seconds)
+        water_needed += sum(map(lambda e: e.eat(available_water, seconds),
+                                self.children))
 
         return water_needed
 
@@ -181,9 +176,8 @@ class Trunk(EqualityComparable):
 
         self.energy -= consumed_energy
 
-        for t in self.children:
-
-            consumed_energy += t.keep_alive(seconds)
+        consumed_energy += sum(map(lambda e: e.keep_alive(seconds),
+                                   self.children))
 
         return consumed_energy
 
