@@ -10,12 +10,11 @@ class ItemNotUsableException(Exception):
 
 class Item(EqualityComparable):
 
-    def __init__(self, name, quantity, usable, user_id):
+    def __init__(self, name, quantity, usable):
 
         self.name = name
         self.usable = usable
         self.quantity = quantity
-        self.user_id = user_id
 
     def use(self, quantity):
 
