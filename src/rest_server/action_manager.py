@@ -1,20 +1,25 @@
 # Action handling and dispatching functions
 __author__ = "francescopischedda"
 __date__ = "$30-dic-2011 16.57.16$"
+import importlib
 
 
 __action_to_function = None
 
 
-def load_actions(actions, root_module):
+def load_actions(actions, root_module_name):
     """
     load the speficied functions associated to an action name
     parameters:
         - actions a dict (or a ky-value container) where key is the action name
         and the value is the function name
     """
+
+    root_module = importlib.import_module(root_module_name)
+
     global __action_to_function
-    __action_to_function = {a: get_func(actions[a], root_module) for a in actions}
+    __action_to_function = {k: get_func(v, root_module)
+                            for k, v in actions.iteritems()}
 
 
 def run_action(action, parameters):

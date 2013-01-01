@@ -38,6 +38,6 @@ def parse_parameters(action_parameters, parameter_list):
             if k['optional'] is False:
                 raise ex
             else:
-                break
+                params[k['name']] = None
 
     return params
