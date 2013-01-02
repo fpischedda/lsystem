@@ -6,7 +6,6 @@ from daemon import Daemon
 from rest_server import settings
 from rest_server import session_manager
 import url_action_caller
-import actions
 
 
 class RESTServer(BaseHTTPRequestHandler):
@@ -44,7 +43,7 @@ def json_handler(obj):
 
 def start_server(port, actions_dict):
 
-    url_action_caller.init(actions_dict, actions)
+    url_action_caller.init(actions_dict, 'actions')
 
     try:
         server = HTTPServer(('', port), RESTServer)
@@ -69,8 +68,7 @@ class MyDaemon(Daemon):
 
     def run(self):
         s = settings.Settings.get_instance()
-        acts = {k: v.function for k, v in s.actions.iteritems()}
-        start_server(self.port, acts)
+        start_server(self.port, s.actions)
 
 if __name__ == "__main__":
 
