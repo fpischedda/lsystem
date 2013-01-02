@@ -106,5 +106,4 @@ if __name__ == "__main__":
         sys.exit(0)
     else:
         s = settings.Settings.get_instance()
-        acts = {k: v.function for k, v in s.actions.iteritems()}
-        start_server(8000, acts)
+        start_server(8000, s.actions)
