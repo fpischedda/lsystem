@@ -27,17 +27,17 @@ def parse_parameters(action_parameters, parameter_list):
 
     params = dict()
 
-    p = action_parameters
     pos = 0
-    for k in p:
+    for p in action_parameters:
 
         try:
-            params[k['name']] = parameter_list[pos]
-            pos += 1
+            params[p['name']] = parameter_list[pos]
         except IndexError as ex:
-            if k['optional'] is False:
+            if p['optional'] is False:
                 raise ex
             else:
-                params[k['name']] = None
+                params[p['name']] = None
+
+        pos += 1
 
     return params
