@@ -3,26 +3,46 @@ from collections import namedtuple
 
 class Serializable(object):
 
-    ID_FIELDS = None
+    ID_FIELD = None
     FIELDS = None
 
     def get_id(self):
 
-        return {name: self.__dict__[name] for name in self.__class__.ID_FIELDS}
+        try:
+            return {self.ID_FIELD: self.__dict__[self.ID_FIELD]}
+        except KeyError:
+
+            return None
+
+    def set_id(self, id):
+
+        self.__dict__[self.ID_FIELD] = id
+
+    def get_id_value(self):
+
+        try:
+            return self.__dict__[self.ID_FIELD]
+        except KeyError:
+
+            return None
 
     @classmethod
     def unserialize(cls, obj):
 
-        print("class %s" % cls)
-        print("object %s" % obj)
         new_obj = {f.name: f.unserialize_func(obj[f.name]) for f in cls.FIELDS}
 
-        print(new_obj)
         return cls(**new_obj)
 
     def serialize(self):
 
-        return {f.name: f.serialize_func(self, f.name) for f in self.FIELDS}
+        obj = {f.name: f.serialize_func(self, f.name) for f in self.FIELDS}
+        if self.ID_FIELD not in self.FIELDS:
+
+            id = self.get_id_value()
+            if id is not None:
+                obj[self.ID_FIELD] = self.get_id_value()
+
+        return obj
 
     @classmethod
     def list_unserialize(cls, obj):
@@ -55,7 +75,7 @@ class Serializable(object):
     @classmethod
     def reference_unserialize(cls, reference):
 
-        return cls.unserialize(cls.get_by_reference(reference))
+        return cls.get_by_reference(reference)
 
     def reference_serialize(self, name):
 
@@ -67,9 +87,14 @@ class Serializable(object):
         raise Exception("This serializable is not referentiable")
 
     @classmethod
+    def exists_by_reference(cls, reference):
+
+        raise Exception("This serializable is not referentialbe")
+
+    @classmethod
     def reference_list_unserialize(cls, list):
 
-        return [cls.unserialize(cls.get_by_reference(r)) for r in list]
+        return [cls.get_by_reference(r) for r in list]
 
     def reference_list_serialize(self, name):
 

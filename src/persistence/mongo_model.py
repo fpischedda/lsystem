@@ -4,9 +4,9 @@ from persistence.serializable import Serializable
 
 class MongoModel(Serializable):
 
-    ID_FIELDS = ("__id")
+    ID_FIELD = "_id"
 
-    COLLECTION_NAME = ""
+    COLLECTION = ""
 
     def __init__(self):
 
@@ -16,43 +16,82 @@ class MongoModel(Serializable):
     def get_collection(cls):
 
         db = mongo_connection.get_default_db()
-        return db[cls.COLLECTION_NAME]
+        return db[cls.COLLECTION]
 
     @classmethod
     def get_object_id(cls, obj):
 
-        return {name: obj.getattr(name) for name in cls.ID_FIELDS}
+        return {cls.ID_FIELD: obj.getitem[cls.ID_FIELD]}
 
     @classmethod
-    def insert(cls, obj):
+    def unserialize(cls, obj):
 
-        collection = cls.get_collection()
-        s = obj.serialize()
-        collection.insert(s)
+        res = super(MongoModel, cls).unserialize(obj)
 
-    def update(self, obj):
+        res.set_id(obj[cls.ID_FIELD])
 
-        collection = MongoModel.get_collection()
+        return res
+
+    def save(self):
+
+        prev_id = self.get_id_value()
         s = self.serialize()
-        id = MongoModel.get_object_id(obj)
-        collection.update(id, s)
+        id = self.get_collection().save(s, manipulate=True)
+
+        if prev_id is None:
+            self.set_id(id)
+
+        return self.get_id()
+
+    def insert(self):
+
+        collection = self.get_collection()
+        s = self.serialize()
+        return collection.insert(s)
+
+    def update(self):
+
+        collection = self.get_collection()
+        s = self.serialize()
+        collection.update(s, self.get_id())
+        return self.get_id()
 
     @classmethod
-    def get_by_id(cls, id):
+    def get_by_id(cls, reference):
 
-        return cls.get_one_by(id)
+        ref = {cls.ID_FIELD: reference}
+        return cls.get_one_by(ref)
+
+    @classmethod
+    def get_by_reference(cls, reference):
+
+        return cls.get_one_by(reference)
 
     @classmethod
     def get_one_by(cls, fields):
 
-        u = cls.collection.find_one(fields)
+        collection = cls.get_collection()
+        o = collection.find_one(fields)
 
-        if u is not None:
-            return cls.unserialize(u)
+        if o is not None:
+            return cls.unserialize(o)
 
         return None
 
     @classmethod
+    def all(cls):
+
+        res = cls.get_collection().find()
+
+        objs = [cls.unserialize(o) for o in res if o is not None]
+
+        return objs
+
+    @classmethod
     def find_by(cls, opts):
 
-        return None
+        res = cls.get_collection().find(opts)
+
+        objs = [cls.unserialize(o) for o in res]
+
+        return objs
