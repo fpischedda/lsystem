@@ -1,0 +1,103 @@
+{
+    "action_stub":{
+            "function":"",
+            "parameters":[],
+            "protected":true
+        },
+    "actions": {
+        "register":{
+            "function":"user.register",
+            "parameters":[
+                {"name":"username", "position":0, "optional":false},
+                {"name":"password", "position":1, "optional":false},
+                {"name":"email", "position":2, "optional":false}
+            ],
+            "protected":false
+        },
+        "login":{
+            "function":"user.login",
+            "parameters":[
+                {"name":"email", "position":0, "optional":false},
+                {"name":"password", "position":1, "optional":false}
+            ],
+            "protected":false
+        },
+        "logout":{
+            "function":"user.logout"
+        },
+        "user.environments":{
+            "function":"user.environments",
+            "parameters":[{"name":"username", "position":0, "optional":true}]
+        },
+        "user.details":{
+            "function":"user.details",
+            "parameters":[
+                {"name":"username", "position":0, "optional":true}
+            ]
+        },
+        "user.items":{
+            "function":"user.items",
+            "parameters":[
+                {"name":"username", "position":0, "optional":true}
+            ]
+        },
+        "user.use_item":{
+            "function":"items.use_item",
+            "parameters":[
+                {"name":"item_name", "position":0, "optional":false},
+                {"name":"plant_name", "position":1, "optional":false}
+            ]
+        },
+        "user.use_magic_bottle":{
+            "function":"items.use_magic_bottle",
+            "parameters":[
+                {"name":"plant_name", "position":0, "optional":false}
+            ]
+        },
+        "user.plant_details":{
+            "function":"user.plant",
+            "parameters":[
+                {"name":"name", "position":0, "optional":false},
+                {"name":"username", "position":1, "optional":true}
+            ]
+        },
+        "user.environment_details":{
+            "function":"user.environment_details",
+            "parameters":[
+                
+                {"name":"name", "position":0, "optional":false},
+                {"name":"username", "position":1, "optional":true}
+            ]
+        },
+        "user.get_all_names":{
+            "function":"user.get_all_names",
+            "protected":false
+        },
+        "grow":{
+            "function":"helpers.grow",
+            "parameters":[
+                {"name":"name", "position":0, "optional":false}
+            ]
+        },
+        "eat":{
+            "function":"helpers.eat",
+            "parameters":[
+                {"name":"name", "position":0, "optional":false}
+            ]
+        },
+        "add_water":{
+            "function":"water.add_water",
+            "parameters":[
+                {"name":"name", "position":0, "optional":false},
+                {"name":"liters", "position":1, "optional":false}
+            ]
+        },
+        "timeline.last_messages":{
+            "function":"timeline.last_messages",
+            "parameters":[
+                {"name":"last_id", "position":0, "optional":true}
+            ],
+            "protected":false
+        }
+    }
+}

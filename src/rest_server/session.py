@@ -1,17 +1,13 @@
-import time
-import uuid
+import datetime
 from persistence.mongo_model import MongoModel
 
 
 #class that define a session for a user
 class Session(MongoModel):
 
-    ID_FIELDS = ('id', )
-
     COLLECTION = 'sessions'
 
-    FIELDS = (MongoModel.field('id'),
-              MongoModel.field('user_id'),
+    FIELDS = (MongoModel.field('user_id'),
               MongoModel.field('ip'),
               MongoModel.field('device'),
               MongoModel.field('start_date'),
@@ -22,32 +18,34 @@ class Session(MongoModel):
                  last_operation_date=None,
                  close_date=None):
 
-        self.id = uuid.uuid4().hex
         self.user_id = user_id
         self.ip = ip
         self.device = device
-        self.start_date = start_date or time.time
+        self.start_date = start_date or datetime.datetime.utcnow()
         self.close_date = close_date
-        self.last_operation_date = last_operation_date or time.time
+        self.last_operation_date = last_operation_date or datetime.datetime.utcnow()
 
     def is_expired(self, max_inactive_seconds):
         """
         returns True if the session is expired if the last operation happened
         more than max_inactive_seconds seconds ago
         """
-        return self.last_operation_date - max_inactive_seconds < time.time
+        now = datetime.datetime.utcnow()
 
-    @classmethod
-    def get_by_id(cls, id):
-
-        return cls.get_by({'id': id})
+        return self.last_operation_date - max_inactive_seconds < now
 
     @classmethod
     def get_by_user_id(cls, user_id):
 
-        return cls.get_by({'user_id': user_id})
+        return cls.get_one_by({'user_id': user_id})
+
+    def close(self):
+
+        now = datetime.datetime.utcnow()
+        self.update_fields_by({'close_date': now}, self.get_id())
 
     @classmethod
     def close_by_id(cls, id):
 
-        cls.update_fields({'close_date': time.time}, {'id', id})
+        now = datetime.datetime.utcnow()
+        cls.update_fields_by({'close_date': now}, {'_id', id})

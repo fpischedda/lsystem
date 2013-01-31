@@ -3,8 +3,8 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import json
 import sys
 from daemon import Daemon
-from rest_server import settings
-from rest_server import session_manager
+import settings
+import session_manager
 import url_action_caller
 
 
@@ -18,15 +18,16 @@ class RESTServer(BaseHTTPRequestHandler):
 
         try:
             self.send_response(200)
-            self.send_header('Content-type', 'text/html')
+            self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
 
             try:
                 ret = url_action_caller.call_by_url(self.path,
+                                                    self,
                                                     session_manager.get_session)
 
-                self.wfile.write(json.dumps(ret, default=json_handler))
+                self.wfile.write(json.dumps(ret))
             except url_action_caller.AuthException:
                 self.send_error(403, "auth error")
 
@@ -34,26 +35,19 @@ class RESTServer(BaseHTTPRequestHandler):
             self.send_error(404, "unhandled request")
 
 
-def json_handler(obj):
-    if hasattr(obj, 'isoformat'):
-        return obj.isoformat()
-    else:
-        return obj
-
-
 def start_server(port, actions_dict):
 
     url_action_caller.init(actions_dict, 'actions')
 
     try:
-        server = HTTPServer(('', port), RESTServer)
+        s = HTTPServer(('', port), RESTServer)
 
         print('starting server at port %s' % port)
-        server.serve_forever()
+        s.serve_forever()
 
     except KeyboardInterrupt:
         print('terminate signal received, shutting down...')
-        server.socket.close()
+        s.socket.close()
 
         print '...done'
 

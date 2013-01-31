@@ -8,9 +8,9 @@ def function_to_call(value):
 
 def test_get_func():
 
-    f_name = "test_action_manager.function_to_call"
+    f_name = "function_to_call"
 
-    root_module = importlib.import_module('rest_server.tests')
+    root_module = importlib.import_module('rest_server.tests.test_action_manager')
     f = action_manager.get_func(f_name, root_module)
 
     assert f(1) == 1
